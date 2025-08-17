@@ -1,0 +1,9 @@
+*{
+  padding: 0;
+  margin: 0;
+}
+.main{
+  background: linear-gradient(to bottom, #A2E4CE 50%,#43AA87, #005a41 80%, #002D20 90%);
+}
+
+

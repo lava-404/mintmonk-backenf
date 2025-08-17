@@ -1,0 +1,75 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+.main{
+  display: flex;
+  gap: 5vw;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  margin-top: -45vh;
+  z-index: 3;
+}
+
+.feature{
+  display: flex;
+  flex-direction: column;
+  gap: 2vh;
+  border-radius: 40px;
+  height: 40vh;
+  padding: 7vh 2vw 7vh 2vw;
+  background-color: #DCF9F2;
+  font-family: 'playfair display', sans-serif;
+  width: 15vw;
+  z-index: 3;
+  border: 0.5px black solid;
+  font-size: 20px;
+}
+.image{
+
+}
+.text{
+  text-align: center;
+}
+
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+    gap: 5vh;
+    margin-top: -20vh;
+  }
+
+  .feature {
+    width: 60vw;
+    padding: 5vh 5vw;
+  }
+
+  .image {
+    max-width: 520px;
+  }
+
+  .text {
+    font-size: 0.95rem;
+  }
+  .main{
+    padding-top: -30vh;
+  }
+}
+
+/* 📱 Small screens */
+@media (max-width: 480px) {
+  .feature {
+    width: 80vw;
+    padding: 4vh 6vw;
+    border-radius: 30px;
+  }
+
+  .image {
+    max-width: 500px;
+  }
+
+  .text {
+    font-size: 0.9rem;
+  }
+}

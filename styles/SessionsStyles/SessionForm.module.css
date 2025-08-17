@@ -1,0 +1,50 @@
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 3rem;
+}
+
+.form {
+  background: linear-gradient(to bottom right, #ffffff, #f8fbfa);
+  padding: 2.5rem;
+  border-radius: 24px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  width: 750px;
+  display: flex;
+  flex-direction: column;
+}
+
+.heading {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 2rem;
+  color: #2c3e50;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem 2rem;
+  margin-bottom: 2rem;
+}
+
+.submitBtn {
+  background: #43aa87;
+  color: white;
+  font-size: 18px;
+  font-weight: 600;
+  border: none;
+  padding: 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  align-self: center;
+  width: 60%;
+  transition: all 0.2s ease-in-out;
+}
+
+.submitBtn:hover {
+  background: #369173;
+  transform: translateY(-2px);
+}

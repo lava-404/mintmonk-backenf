@@ -1,0 +1,22 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.12.4",
+  "dependencies": {
+    "@civic/auth": "^0.9.5",
+    "@civic/auth-web3": "^0.7.2",
+    "@privy-io/react-auth": "^2.21.3",
+    "@solana/spl-token": "^0.4.13",
+    "@solana/web3.js": "^1.73.0",
+    "cors": "^2.8.5",
+    "nodemon": "^3.1.10"
+  }
+}

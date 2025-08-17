@@ -1,0 +1,66 @@
+.timerBox {
+  background: #e9fdf4;
+  border: 2px solid #a2e4ce;
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  box-shadow: 0 6px 12px rgba(0, 45, 32, 0.08);
+  width: 280px;
+  margin: auto;
+  transition: transform 0.2s ease;
+}
+
+.timerBox:hover {
+  transform: translateY(-2px);
+}
+
+.timeDisplay {
+  font-size: 3rem;
+  font-weight: bold;
+  color: #006d56;
+  margin-bottom: 1.5rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.timerControls {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.6rem 1.2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.startBtn {
+  background: #43aa87;
+  color: white;
+}
+
+.startBtn:hover {
+  background: #36916f;
+}
+
+.pauseBtn {
+  background: #ffa07a;
+  color: white;
+}
+
+.pauseBtn:hover {
+  background: #e68b63;
+}
+
+.resetBtn {
+  background: #f1f1f1;
+  color: #333;
+}
+
+.resetBtn:hover {
+  background: #ddd;
+}
