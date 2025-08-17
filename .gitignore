@@ -1,9 +1,8 @@
-# Logs
-logs
 
 
 # Ignore all node_modules in the project
 **/node_modules/
 
 # Ignore all .env files
-*.env
+.env
+.env.*
