@@ -1,5 +1,5 @@
 // src/components/Sessions/SessionsTable.jsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import axios from "axios";
 import styles from "../../styles/SessionsStyles/SessionsTable.module.css";
 
@@ -7,27 +7,34 @@ const SessionsTable = () => {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const userId = localStorage.getItem("userId"); // 👈 grab current user
-        const res = await axios.get(`http://localhost:5667/sessions/${userId}`);
-        setSessions(res.data); // backend already returns clean array
-      } catch (err) {
-        console.error("Error fetching sessions:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchSessions();
+  const fetchSessions = useCallback(async () => {
+    try {
+      setLoading(true);
+      const userId = localStorage.getItem("userId"); // 👈 grab current user
+      const res = await axios.get(`http://localhost:5667/sessions/${userId}`);
+      setSessions(res.data); // backend already returns clean array
+    } catch (err) {
+      console.error("Error fetching sessions:", err);
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   if (loading) return <p>Loading session history...</p>;
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.title}>📅 Session History</h2>
+      <div className={styles.headerRow}>
+        <h2 className={styles.title}>📅 Session History</h2>
+        <button className={styles.refreshBtn} onClick={fetchSessions}>
+          🔄 Refresh
+        </button>
+      </div>
+
       <table className={styles.table}>
         <thead>
           <tr>

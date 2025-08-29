@@ -1,12 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import InputField from "./InputField";
 import styles from "../../styles/SessionsStyles/SessionForm.module.css";
+import { TimerContext } from "../../src/context/TimerContext"
 
 const SessionForm = () => {
   const navigate = useNavigate();
-  const userId = localStorage.getItem("userId");  // 👈 FIX: grab from localStorage
+  const { setCurrentSession } = useContext(TimerContext); // 👈 grab setter
+  const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
     task: "",
@@ -23,43 +25,45 @@ const SessionForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-  
+
     try {
       if (!userId) {
         alert("User ID missing. Please log in.");
         return;
       }
-  
+
       const durationNumber = parseInt(form.duration) || 0;
       const stakeNumber = parseInt(form.stake) || 0;
-  
+
       if (!form.task || durationNumber <= 0 || stakeNumber <= 0) {
         alert("Please fill task, duration, and stake correctly.");
         return;
       }
-  
+
       const payload = {
         userId,
         task: form.task,
-        duration: durationNumber,   // send number
+        duration: durationNumber,
         stake: stakeNumber,
         breaks: form.breaks || "No Breaks",
         boost: form.boost || "None",
       };
-      console.log("Submitting payload:", payload);
+
       const res = await axios.post("http://localhost:5667/sessions", payload, {
         headers: { "Content-Type": "application/json" },
       });
-  
+
+      // 👈 Save session to context so Timer has it
+      setCurrentSession(res.data);
+
       alert(`Session "${form.task}" started! Timer will begin now.`);
-      navigate("/timer", { state: { session: res.data } });
-  
+      navigate("/timer"); // no need to pass state, context has it
     } catch (err) {
       console.error("Error creating session:", err);
       alert("Failed to start session. Check console for details.");
     }
   };
-  
+
   return (
     <div className={styles.wrapper}>
       <form className={styles.form} onSubmit={handleSubmit}>
@@ -80,7 +84,7 @@ const SessionForm = () => {
             type="select"
             value={form.duration}
             onChange={handleChange}
-            options={["15 min", "25 min", "45 min", "60 min"]}
+            options={["15", "25", "45", "60"]}
             required
           />
           <InputField
