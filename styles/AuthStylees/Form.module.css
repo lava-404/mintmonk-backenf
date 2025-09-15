@@ -134,6 +134,10 @@ input:focus {
   transform: scale(1.1);
 }
 
+.interactiveIcon {
+  cursor: pointer;
+}
+
 .fancy_separator {
   display: flex;
   align-items: center;

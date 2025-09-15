@@ -1,13 +1,35 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../../styles/HomeStyles/HomePage.module.css";
 import { useNavigate } from "react-router-dom";
 
 const Dashboard = () => {
   const navigate = useNavigate();
 
+  const [profile, setProfile] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
+
   const handleClick = async () => {
     navigate('/startSession')
   }
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      setLoadingProfile(false);
+      return;
+    }
+    (async () => {
+      try {
+        const res = await fetch(`http://localhost:5667/users/${userId}/summary`);
+        const data = await res.json();
+        setProfile(data);
+      } catch (e) {
+        console.error('Failed to load profile', e);
+      } finally {
+        setLoadingProfile(false);
+      }
+    })();
+  }, []);
   return (
     <div className={styles.dashboard}>
       {/* Sidebar */}
@@ -26,7 +48,7 @@ const Dashboard = () => {
       <img className={styles.icon} src="../../src/assets/earnings.png" alt="earnings" />
       <span>Earnings</span>
     </a>
-    <a href="#" className={styles.link}>
+    <a href="/leaderboard" className={styles.link}>
       <img className={styles.icon} src="../../src/assets/leaderboard.png" alt="leaderboard" />
       <span>Leaderboard</span>
     </a>
@@ -134,12 +156,36 @@ const Dashboard = () => {
 
       {/* Right Sidebar */}
       <aside className={styles.rightbar}>
-        <img
-          src="../../src/assets/Mia.png"
-          alt="profile"
-          className={styles.avatar}
-        />
-        <p>Welcome Mia</p>
+        {loadingProfile ? (
+          <div className={styles.smallText}>Loading profile…</div>
+        ) : profile ? (
+          <div className={styles.profileCard}>
+            <img
+              src={profile.image || "../../src/assets/Mia.png"}
+              alt="profile"
+              className={styles.avatar}
+            />
+            <div className={styles.userName}>{profile.name}</div>
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Wallet</span>
+              <span className={styles.metaValue}>{profile.wallet ? `${profile.wallet.slice(0,4)}…${profile.wallet.slice(-4)}` : '-'}</span>
+            </div>
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Balance</span>
+              <span className={styles.metaValue}>{profile.tokenBalance} MM</span>
+            </div>
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Completed</span>
+              <span className={styles.metaValue}>{profile.sessionsCompleted}</span>
+            </div>
+            <div className={styles.metaRow}>
+              <span className={styles.metaLabel}>Rewards</span>
+              <span className={styles.metaValue}>{profile.totalRewards} coins</span>
+            </div>
+          </div>
+        ) : (
+          <div className={styles.smallText}>Please sign in to view your profile.</div>
+        )}
       </aside>
     </div>
   );

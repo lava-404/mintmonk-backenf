@@ -1,12 +1,13 @@
 import InputField from "./InputField";
 import SessionForm from "./SessionForm";
+import styles from "../../styles/SessionsStyles/Sessions.module.css";
 
 const StartSession = () => {
-  return(
-    <>
+  return (
+    <div className={styles.main}>
       <SessionForm />
-    </>
-  )
+    </div>
+  );
 }
 
 export default StartSession;

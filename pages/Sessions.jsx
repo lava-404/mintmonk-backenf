@@ -1,14 +1,12 @@
 import SessionsTable from "../components/SessionsComponents/SessionsTable";
-import Timer from "../components/SessionsComponents/Timer";
-import styles from "../styles/SessionsStyles/Sessions.module.css"
+import styles from "../styles/SessionsStyles/Sessions.module.css";
 
 const Sessions = () => {
-  return(
+  return (
     <div className={styles.main}>
-       <SessionsTable />
+      <SessionsTable />
     </div>
-   
-  )
-}
+  );
+};
 
 export default Sessions;

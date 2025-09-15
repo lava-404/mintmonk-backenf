@@ -1,13 +1,14 @@
+// src/components/Sessions/SessionForm.jsx
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import InputField from "./InputField";
 import styles from "../../styles/SessionsStyles/SessionForm.module.css";
-import { TimerContext } from "../../src/context/TimerContext"
+import { TimerContext } from "../../src/context/TimerContext";
 
 const SessionForm = () => {
   const navigate = useNavigate();
-  const { setCurrentSession } = useContext(TimerContext); // 👈 grab setter
+  const { setCurrentSession, setTimerVisible } = useContext(TimerContext); // 👈 also grab setTimerVisible
   const userId = localStorage.getItem("userId");
 
   const [form, setForm] = useState({
@@ -23,7 +24,7 @@ const SessionForm = () => {
     setForm({ ...form, [name]: value });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => { 
     e.preventDefault();
 
     try {
@@ -32,8 +33,9 @@ const SessionForm = () => {
         return;
       }
 
-      const durationNumber = parseInt(form.duration) || 0;
-      const stakeNumber = parseInt(form.stake) || 0;
+      // 🔥 Always parse numeric fields as numbers
+      const durationNumber = Number(form.duration) || 0;
+      const stakeNumber = Number(form.stake) || 0;
 
       if (!form.task || durationNumber <= 0 || stakeNumber <= 0) {
         alert("Please fill task, duration, and stake correctly.");
@@ -43,7 +45,7 @@ const SessionForm = () => {
       const payload = {
         userId,
         task: form.task,
-        duration: durationNumber,
+        duration: durationNumber, // 👈 number, not string
         stake: stakeNumber,
         breaks: form.breaks || "No Breaks",
         boost: form.boost || "None",
@@ -53,11 +55,19 @@ const SessionForm = () => {
         headers: { "Content-Type": "application/json" },
       });
 
-      // 👈 Save session to context so Timer has it
-      setCurrentSession(res.data);
+      // Save to context with required timer info
+      const plannedSeconds = durationNumber * 60;
+      setCurrentSession({
+        _id: res.data.sessionId,
+        plannedDuration: plannedSeconds,
+        stake: stakeNumber,
+        boost: form.boost || "None",
+        topic: form.task,
+      });
+      setTimerVisible(true);
 
       alert(`Session "${form.task}" started! Timer will begin now.`);
-      navigate("/timer"); // no need to pass state, context has it
+      navigate("/sessions");
     } catch (err) {
       console.error("Error creating session:", err);
       alert("Failed to start session. Check console for details.");

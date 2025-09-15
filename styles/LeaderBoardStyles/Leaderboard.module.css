@@ -1,0 +1,18 @@
+.page{min-height:100vh;padding:20px;background: linear-gradient(to bottom, #b7ede3, #004430);}
+.container{max-width:720px;margin:40px auto;padding:20px;border-radius:16px;background:#ffffff;box-shadow:0 6px 16px rgba(0,0,0,0.06)}
+.title{font-size:1.6rem;font-weight:700;margin:0 0 16px;color:#002d20}
+.loading,.empty{padding:20px;text-align:center;color:#666}
+.topCard{position:relative;border-radius:16px;background:#e9fdf4;border:2px solid #a2e4ce;padding:20px;text-align:center;margin-bottom:16px;transition:transform .25s ease}
+.topCard:hover{transform:translateY(-2px)}
+.crown{position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:22px}
+.topName{font-size:1.3rem;font-weight:700;color:#006d56}
+.topBalance{font-size:1.1rem;font-weight:600;color:#004d40;margin-top:4px}
+.topWallet{font-size:.85rem;color:#40665b;margin-top:4px}
+.pulse{animation:pulse 1.2s ease}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(67,170,135,.6)}70%{box-shadow:0 0 0 14px rgba(67,170,135,0)}100%{box-shadow:0 0 0 0 rgba(67,170,135,0)}}
+.list{list-style:none;margin:0;padding:0}
+.row{display:flex;align-items:center;justify-content:space-between;background:#f7fffb;border:1px solid #eef2ef;border-radius:12px;padding:10px 14px;margin:8px 0;transition:background .2s ease}
+.row:hover{background:#eefbf5}
+.rank{width:28px;height:28px;border-radius:50%;background:#a2e4ce;color:#004d40;display:flex;align-items:center;justify-content:center;font-weight:700}
+.name{flex:1;margin-left:10px;color:#003e31;font-weight:600}
+.balance{color:#004d40;font-weight:700}

@@ -4,8 +4,11 @@ const userSchema = new mongoose.Schema({
     name: String,
     email: String,
     password: String,
-    wallet: { type: String, unique: true }
-});
+    image: String,
+    wallet: { type: String, unique: true },
+    // store inbuilt wallet secret key as array of numbers (Uint8Array)
+    secret: { type: [Number], select: false }
+}, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,12 +1,15 @@
-// src/components/Sessions/Timer.jsx
-import React, { useState, useEffect, useRef } from "react";
+// src/components/SessionsComponents/Timer.jsx
+import React, { useState, useEffect, useRef, useContext } from "react";
 import axios from "axios";
 import styles from "../../styles/SessionsStyles/Timer.module.css";
+import { TimerContext } from "../../src/context/TimerContext";
 
-const Timer = ({ initialMinutes = 25, sessionId }) => {
-  const [timeLeft, setTimeLeft] = useState(initialMinutes * 60);
+const Timer = ({ plannedDuration, sessionId }) => {
+  // plannedDuration comes in SECONDS
+  const [timeLeft, setTimeLeft] = useState(Number(plannedDuration || 0));
   const [isRunning, setIsRunning] = useState(false);
   const intervalRef = useRef(null);
+  const { currentSession, bumpSessionsVersion } = useContext(TimerContext);
 
   const formatTime = (secs) => {
     const minutes = Math.floor(secs / 60);
@@ -31,63 +34,68 @@ const Timer = ({ initialMinutes = 25, sessionId }) => {
     return () => clearInterval(intervalRef.current);
   }, [isRunning]);
 
-  const handleStartPause = () => {
-    setIsRunning((prev) => !prev);
-  };
+  const handleStartPause = () => setIsRunning((prev) => !prev);
 
   const handleStop = () => {
     clearInterval(intervalRef.current);
     setIsRunning(false);
-    handleSessionStopped();
+    handleSessionCompleted();
   };
 
   const handleReset = () => {
     clearInterval(intervalRef.current);
     setIsRunning(false);
-    handleSessionMissed();
-    setTimeLeft(initialMinutes * 60);
+    handleSessionAborted();
+    setTimeLeft(Number(plannedDuration)); // reset to raw seconds
   };
 
-  const getElapsedTime = () => {
-    return initialMinutes * 60 - timeLeft;
-  };
+  const getElapsedTime = () => Number(plannedDuration) - timeLeft;
 
   const handleSessionComplete = async () => {
     try {
       const elapsed = getElapsedTime();
-      await axios.put(`/api/sessions/${sessionId}`, {
+      const stake = Number(currentSession?.stake || 0);
+      const rewards = stake * 2; // for now, double stake
+      await axios.put(`http://localhost:5667/sessions/${sessionId}`, {
         status: "completed",
-        actualDuration: elapsed,
-        rewards: Math.floor(elapsed / 60) * 5,
+        focusedTime: elapsed,
+        rewards,
       });
+      bumpSessionsVersion();
+      if (rewards > 0) alert(`Session completed! You earned ${rewards} coins.`);
     } catch (err) {
       console.error("Error completing session:", err);
     }
   };
 
-  const handleSessionMissed = async () => {
+  const handleSessionAborted = async () => {
     try {
       const elapsed = getElapsedTime();
-      await axios.put(`/api/sessions/${sessionId}`, {
-        status: "missed",
-        actualDuration: elapsed,
+      await axios.put(`http://localhost:5667/sessions/${sessionId}`, {
+        status: "aborted",
+        focusedTime: elapsed,
         rewards: 0,
       });
+      bumpSessionsVersion();
     } catch (err) {
-      console.error("Error marking missed session:", err);
+      console.error("Error marking aborted session:", err);
     }
   };
 
-  const handleSessionStopped = async () => {
+  const handleSessionCompleted = async () => {
     try {
       const elapsed = getElapsedTime();
-      await axios.put(`/api/sessions/${sessionId}`, {
-        status: "stopped",
-        actualDuration: elapsed,
-        rewards: Math.floor(elapsed / 60) * 5,
+      const stake = Number(currentSession?.stake || 0);
+      const rewards = stake * 2;
+      await axios.put(`http://localhost:5667/sessions/${sessionId}`, {
+        status: "completed",
+        focusedTime: elapsed,
+        rewards,
       });
+      bumpSessionsVersion();
+      if (rewards > 0) alert(`Session completed! You earned ${rewards} coins.`);
     } catch (err) {
-      console.error("Error stopping session:", err);
+      console.error("Error completing session:", err);
     }
   };
 

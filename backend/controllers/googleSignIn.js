@@ -1,7 +1,7 @@
 // backend/controllers/googleAuth.js
 require('dotenv').config();
-const { Connection, PublicKey, Keypair } = require('@solana/web3.js');
-const { getOrCreateAssociatedTokenAccount, transferChecked } = require('@solana/spl-token');
+const { Connection, PublicKey, Keypair, Transaction, sendAndConfirmTransaction } = require('@solana/web3.js');
+const { getOrCreateAssociatedTokenAccount, transferChecked, getMint, TOKEN_PROGRAM_ID, TOKEN_2022_PROGRAM_ID, ASSOCIATED_TOKEN_PROGRAM_ID, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction } = require('@solana/spl-token');
 const Users = require('../model/Users');
 
 // --- Solana Setup ---
@@ -23,6 +23,57 @@ try {
 
 // --- MintMonk Token ---
 const MINT_MONK_TOKEN = new PublicKey(process.env.MINT_MONK_TOKEN);
+let MINT_DECIMALS = null;
+let MINT_PROGRAM_ID = null;
+
+// Optional mint authority for auto-mint on devnet
+let mintAuthority = null;
+try {
+  if (process.env.MINT_AUTHORITY_SECRET_KEY) {
+    const arr = JSON.parse(process.env.MINT_AUTHORITY_SECRET_KEY);
+    if (Array.isArray(arr) && arr.length === 64) {
+      mintAuthority = Keypair.fromSecretKey(Uint8Array.from(arr));
+      console.log("✅ Mint authority loaded");
+    }
+  }
+} catch (_) {}
+async function detectMintProgramId() {
+  if (MINT_PROGRAM_ID) return MINT_PROGRAM_ID;
+  const info = await connection.getAccountInfo(MINT_MONK_TOKEN);
+  if (!info) throw new Error("Mint account not found on devnet");
+  MINT_PROGRAM_ID = info.owner;
+  return MINT_PROGRAM_ID;
+}
+async function ensureAta(payer, owner, programId) {
+  const ata = await getAssociatedTokenAddress(
+    MINT_MONK_TOKEN,
+    owner,
+    false,
+    programId,
+    ASSOCIATED_TOKEN_PROGRAM_ID
+  );
+  const info = await connection.getAccountInfo(ata);
+  if (!info) {
+    const ix = createAssociatedTokenAccountInstruction(
+      payer.publicKey,
+      ata,
+      owner,
+      MINT_MONK_TOKEN,
+      programId,
+      ASSOCIATED_TOKEN_PROGRAM_ID
+    );
+    const tx = new Transaction().add(ix);
+    await sendAndConfirmTransaction(connection, tx, [payer]);
+  }
+  return { address: ata };
+}
+async function ensureMintDecimals() {
+  if (MINT_DECIMALS !== null) return MINT_DECIMALS;
+  const programId = await detectMintProgramId();
+  const mintInfo = await getMint(connection, MINT_MONK_TOKEN, undefined, programId);
+  MINT_DECIMALS = mintInfo.decimals;
+  return MINT_DECIMALS;
+}
 
 // --- Google Sign-In Handler ---
 // --- Google Sign-In Handler ---
@@ -51,22 +102,30 @@ const googleSignIn = async (req, res) => {
 
       console.log("✅ New user created:", email, walletAddress);
 
-      const recipientAta = await getOrCreateAssociatedTokenAccount(
-        connection,
-        treasuryWallet,
-        MINT_MONK_TOKEN,
-        newWallet.publicKey
-      );
+      const programId = await detectMintProgramId();
+      const recipientAta = await ensureAta(treasuryWallet, newWallet.publicKey, programId);
 
-      const treasuryAta = await getOrCreateAssociatedTokenAccount(
-        connection,
-        treasuryWallet,
-        MINT_MONK_TOKEN,
-        treasuryWallet.publicKey
-      );
+      const treasuryAta = await ensureAta(treasuryWallet, treasuryWallet.publicKey, programId);
 
-      const decimals = 9;
-      const amount = BigInt(50) * BigInt(10) ** BigInt(decimals);
+      const decimals = await ensureMintDecimals();
+      const amount = BigInt(100) * BigInt(10) ** BigInt(decimals);
+
+      // Ensure treasury has at least 100 tokens; if not and mintAuthority present, mint supply
+      const bal = await connection.getTokenAccountBalance(treasuryAta.address).catch(() => null);
+      const ui = bal?.value?.uiAmount || 0;
+      if (ui < 100 && mintAuthority) {
+        await require('@solana/spl-token').mintTo(
+          connection,
+          treasuryWallet, // payer
+          MINT_MONK_TOKEN,
+          treasuryAta.address,
+          mintAuthority,
+          amount,
+          [],
+          undefined,
+          programId
+        );
+      }
 
       const txSig = await transferChecked(
         connection,
@@ -74,12 +133,15 @@ const googleSignIn = async (req, res) => {
         treasuryAta.address,
         MINT_MONK_TOKEN,
         recipientAta.address,
-        treasuryWallet.publicKey,
+        treasuryWallet,
         amount,
-        decimals
+        decimals,
+        undefined,
+        undefined,
+        programId
       );
 
-      console.log(`🎉 Sent 50 MintMonk tokens to ${walletAddress}, tx: ${txSig}`);
+      console.log(`🎉 Sent 100 MintMonk tokens to ${walletAddress}, tx: ${txSig}`);
     }
 
     // ✅ Ensure fresh user document (so we always have _id)

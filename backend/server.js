@@ -4,6 +4,8 @@ const cors = require("cors");
 const AuthRoute = require('./routes/AuthRoute');
 require('dotenv').config();
 const SessionsRoute = require('./routes/SessionsRoute')
+const LeaderboardRoute = require('./routes/LeaderboardRoute')
+const UsersRoute = require('./routes/UsersRoute')
 
 console.log('Environment variables loaded:');
 console.log('MONGO_URI:', process.env.MONGO_URI);
@@ -39,7 +41,9 @@ mongoose.connect(process.env.MONGO_URI, {
 app.use('/auth', AuthRoute)
 
 app.use('/sessions', SessionsRoute)
+app.use('/leaderboard', LeaderboardRoute)
+app.use('/users', UsersRoute)
 
 app.listen(5667, () => {
     console.log("Server is running on port 5667");
-});     
+});
